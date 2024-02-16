@@ -6,14 +6,17 @@
 <title>Read Text File</title>
 </head>
 <body>
-
 <input type="file" id="fileInput" />
+<h3 id = "heading"></h3>
 <pre id="expirationList"></pre>
 
 <script>
     const expirationListElement = document.getElementById('expirationList');
 
     document.getElementById('fileInput').addEventListener('change', function() {
+        var heading = document.getElementById('heading');
+        heading.textContent = 'Domain names and their SSL certificate expiration time and date';
+
         expirationListElement.textContent = ''; // Clear previous content
 
         var file = this.files[0];
