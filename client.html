@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Read Text File</title>
+</head>
+<body>
+
+<input type="file" id="fileInput" />
+<pre id="expirationList"></pre>
+
+<script>
+    const expirationListElement = document.getElementById('expirationList');
+
+    document.getElementById('fileInput').addEventListener('change', function() {
+        expirationListElement.textContent = ''; // Clear previous content
+
+        var file = this.files[0];
+        var reader = new FileReader();
+
+        reader.onload = function(event) {
+            var contents = event.target.result;
+            var domains = contents.split('\n');
+            console.log(domains);
+            displayDomains(domains);
+        };
+
+        reader.readAsText(file);
+    });
+
+    async function fetchCertificateExpiration(domain) {
+        try {
+            console.log(domain + ' pinged')
+            const response = await fetch(`http://127.0.0.1:3000/getCertificateExpiration?domain=${domain}`);
+            console.log(response);
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Error fetching certificate expiration:', error);
+            return { domain, expirationDate: 'Error fetching expiration date' };
+        }
+    }
+
+    async function displayDomains(domains) {
+        for(const domain of domains) {
+            if(domain !== "") {
+                console.log(domain);
+                const {domain: domainName, expirationDate} = await fetchCertificateExpiration(domain);
+                var listItem = document.createElement('li');
+                listItem.textContent = `${domainName} : ${expirationDate}`;
+                expirationListElement.appendChild(listItem);
+            }
+        };
+    }
+
+    
+</script>
+
+</body>
+</html>
