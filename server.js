@@ -2,10 +2,7 @@ const express = require('express');
 const app = express();
 const ssl_certificate = require('get-ssl-certificate');
 
-console.log("came2");
-
 app.get('/getCertificateExpiration', (req, res) => {
-    console.log("inside route");
     const domain = req.query.domain;
     console.log("server: " + domain);
 

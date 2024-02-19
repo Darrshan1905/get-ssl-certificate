@@ -1,69 +1,87 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Get SSL certificate expiration date</title>
-</head>
-<body>
-<input type="file" id="fileInput" />
-<h3 id = "heading"></h3>
-<pre id="expirationList"></pre>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel = "stylesheet" href="styles.css">
+        <title>Get SSL certificate expiration date</title>
+    </head>
+    <body>
+        <input type="file" id="fileInput" />
+        <h3 id = "heading"></h3>
+        </br>
+        <table id="expirationTable">
+            <thead id="theading">
+            </thead>
+            <tbody id="expirationTableBody">
+            </tbody>
+        </table>
 
-<script>
-    const expirationListElement = document.getElementById('expirationList');
+        <script>
+            const expirationTableBody = document.getElementById('expirationTableBody');
+            const tableHeading = document.getElementById('theading');
 
-    document.getElementById('fileInput').addEventListener('change', function() {
-        var heading = document.getElementById('heading');
-        heading.textContent = 'Domain names and their SSL certificate expiration time and date';
+            document.getElementById('fileInput').addEventListener('change', function() {
+                var heading = document.getElementById('heading');
+                heading.textContent = 'Domain names and their SSL certificate expiration time and date';
 
-        expirationListElement.textContent = ''; // Clear previous content
+                expirationTableBody.innerHTML = ''; // Clear previous content
 
-        var file = this.files[0];
-        var reader = new FileReader();
+                var file = this.files[0];
+                var reader = new FileReader();
 
-        reader.onload = function(event) {
-            var contents = event.target.result;
-            var domains = contents.split('\n');
-            console.log(domains);
-            displayDomains(domains);
-        };
+                reader.onload = function(event) {
+                    var contents = event.target.result;
+                    var domains = contents.split('\n');
+                    console.log(domains);
+                    displayDomains(domains);
+                };
 
-        reader.readAsText(file);
-    });
+                reader.readAsText(file);
+            });
 
-    async function fetchCertificateExpiration(domain) {
-        try {
-            console.log(domain + ' pinged')
-            const response = await fetch(`http://127.0.0.1:3000/getCertificateExpiration?domain=${domain}`);
-            console.log(response);
-            if(response.status === 200) {
-                const data = await response.json();
-                return data;
+            async function fetchCertificateExpiration(domain) {
+                try {
+                    console.log(domain + ' pinged')
+                    const response = await fetch(`http://127.0.0.1:3000/getCertificateExpiration?domain=${domain}`);
+                    console.log(response);
+                    if(response.status === 200) {
+                        const data = await response.json();
+                        return data;
+                    }
+                    else {
+                        return { domain, expirationDate: 'Error fetching expiration date' };
+                    }
+                } catch (error) {
+                    console.error('Error fetching certificate expiration:', error);
+                    return { domain, expirationDate: 'Error fetching expiration date' };
+                }
             }
-            else {
-                return { domain, expirationDate: 'Error fetching expiration date' };
-            }
-        } catch (error) {
-            console.error('Error fetching certificate expiration:', error);
-            return { domain, expirationDate: 'Error fetching expiration date' };
-        }
-    }
 
-    async function displayDomains(domains) {
-        for(const domain of domains) {
-            if(domain !== "") {
-                console.log(domain);
-                const {domain: domainName, expirationDate} = await fetchCertificateExpiration(domain);
-                var listItem = document.createElement('li');
-                listItem.textContent = `${domainName} : ${expirationDate}`;
-                expirationListElement.appendChild(listItem);
-            }
-        };
-    }
-
-    
-</script>
-
-</body>
+            async function displayDomains(domains) {
+                var hrow = document.createElement('tr');
+                var hdomian = document.createElement('th');
+                var hexpirationdate = document.createElement('th');
+                hdomian.textContent = 'Domain name';
+                hexpirationdate.textContent = 'Expiration Date';
+                hrow.appendChild(hdomian);
+                hrow.appendChild(hexpirationdate);
+                tableHeading.appendChild(hrow);
+                for(const domain of domains) {
+                    if(domain !== "") {
+                        console.log(domain);
+                        const {domain: domainName, expirationDate} = await fetchCertificateExpiration(domain);
+                        var row = document.createElement('tr');
+                        var domainCell = document.createElement('td');
+                        var expirationDateCell = document.createElement('td');
+                        domainCell.textContent = domainName;
+                        expirationDateCell.textContent = expirationDate;
+                        row.appendChild(domainCell);
+                        row.appendChild(expirationDateCell);
+                        expirationTableBody.appendChild(row);
+                    }
+                };
+            }   
+        </script>
+    </body>
 </html>
