@@ -19,7 +19,10 @@ app.get('/getCertificateExpiration', (req, res) => {
         const expirationDate = certificate.valid_to;
         console.log('Domain: ' + domain + '\n' + 'Expiration Date: ' + expirationDate + '\n');
         return res.json({domain, expirationDate});
-    }).catch((err) => console.log(err));
+    }).catch((err) => {
+        console.log(err);
+        return res.status(500).json({error: 'Domain param required!'});
+    })
 })
 
 const port = 3000;

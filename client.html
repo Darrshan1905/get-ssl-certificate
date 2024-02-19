@@ -37,8 +37,13 @@
             console.log(domain + ' pinged')
             const response = await fetch(`http://127.0.0.1:3000/getCertificateExpiration?domain=${domain}`);
             console.log(response);
-            const data = await response.json();
-            return data;
+            if(response.status === 200) {
+                const data = await response.json();
+                return data;
+            }
+            else {
+                return { domain, expirationDate: 'Error fetching expiration date' };
+            }
         } catch (error) {
             console.error('Error fetching certificate expiration:', error);
             return { domain, expirationDate: 'Error fetching expiration date' };
